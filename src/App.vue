@@ -1,40 +1,133 @@
 <template>
-  <div id="app" class="principal">
-    <span>App</span>
-    <entrada />
-    <cliente />
-  </div>
+  <v-app>
+    <v-navigation-drawer v-model="menu" app temporary>
+      <v-list>
+        <v-list-tile @click="seleccionar('home')">
+          <v-list-tile-action>
+            <v-icon>home</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title v-text="'Inicio'"></v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile v-if="usuario" @click="seleccionar('perfil')">
+          <v-list-tile-action>
+            <v-icon>account_circle</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title v-text="'Perfil'"></v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile v-if="!usuario" @click="seleccionar('login')">
+          <v-list-tile-action>
+            <v-icon>arrow_forward</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title v-text="'Ingresar'"></v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile v-if="usuario" @click="salir">
+          <v-list-tile-action>
+            <v-icon>arrow_back</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title v-text="'Salir'"></v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </v-navigation-drawer>
+    <v-toolbar color="primary" dark app>
+      <v-toolbar-side-icon @click="menu = !menu"></v-toolbar-side-icon>
+      <v-toolbar-title @click="componenteActual = 'home'" class="headline logo">
+        <span>{{ titulo }}</span>
+      </v-toolbar-title>
+      <v-spacer></v-spacer>
+      <span v-if="usuario">{{ usuario.nombres }}</span>
+    </v-toolbar>
+
+    <v-content>
+      <v-container fluid fill-height>
+        <v-slide-y-transition mode="out-in">
+          <component :is="componenteActual"></component>
+        </v-slide-y-transition>
+      </v-container>
+    </v-content>
+
+    <v-snackbar
+      v-model="notificacion.visible"
+      :color="notificacion.color"
+      multi-line
+      top
+      :timeout="6000"
+      dark
+    >
+      {{ notificacion.mensaje }}
+      <v-btn color="white" flat @click="ocultarNotificacion">Cerrar</v-btn>
+    </v-snackbar>
+
+    <v-dialog v-model="ocupado.visible" max-width="400" persistent>
+      <v-card>
+        <v-toolbar color="primary" dark card>
+          <v-toolbar-title>{{ ocupado.titulo }}</v-toolbar-title>
+        </v-toolbar>
+        <v-card-text card="subheading">{{ ocupado.mensaje }}</v-card-text>
+        <v-card-text>
+          <v-progress-linear :indeterminate="true" color="primary"></v-progress-linear>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <v-footer color="primary" dark>
+      <v-layout justify-center>
+        <span>Curso Vue.js y Firebase - Jorge Bustamante</span>
+      </v-layout>
+    </v-footer>
+  </v-app>
 </template>
 
 <script>
-import Entrada from '@/views/Entrada.vue'
-import Cliente from '@/components/Cliente.vue'
+import Home from "@/views/Home.vue";
+import Registro from "@/views/usuario/Registro.vue";
+import Login from "@/views/usuario/Login.vue";
+import Perfil from "@/views/usuario/Perfil.vue";
+
+import { mapState, mapMutations, mapActions } from "vuex";
+
 
 export default {
-  components: { Entrada, Cliente },
-  name: 'App',
+  components: { Home, Registro, Login, Perfil },
+  name: "App",
   data() {
     return {
-      titulo: 'Entradas'
+      titulo: "Súper Ópera",
+      componenteActual: "home",
+      menu: false
+    };
+  },
+  computed: {
+    ...mapState(['notificacion', 'ocupado']),
+    ...mapState('sesion', ['usuario']),
+  },
+  methods: {
+    ...mapMutations(['ocultarNotificacion']),
+    ...mapActions('sesion', ['cerrarSesion']),
+    seleccionar(nombre) {
+      this.componenteActual = nombre;
+      this.menu = false;
+    },
+    salir() {
+      this.cerrarSesion()
+      this.menu = false
     }
   }
-}
+};
 </script>
 
 <style>
+@import url("https://fonts.googleapis.com/css?family=Great+Vibes");
 
-html {
-  font-size: 62.5% !important; /* 10px / 16px = 0.625 */
+.logo {
+  font-family: "Great Vibes", cursive !important;
+  cursor: pointer;
 }
-
-.principal {
-  background-color: #a21010;
-  padding: 10px;
-  color: white;
-  border-radius: 5px;
-  width: 400px;
-  font-size: 3rem;
-  text-align: center;
-}
-
 </style>
