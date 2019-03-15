@@ -7,7 +7,7 @@
         </v-toolbar>
         <v-card-text>
           <v-text-field
-            label="Email"
+            label="Email" autofocus
             v-model="formulario.email"
             :error-messages="erroresEmail"
             @blur="$v.formulario.email.$touch()"
@@ -24,10 +24,6 @@
         <v-card-text>
           <v-layout justify-end>
             <v-btn
-              :to="{ name: 'registro'}"
-              color="primary"
-            >Registrar</v-btn>
-            <v-btn
               @click="ingresar"
               :depressed="$v.formulario.$invalid"
               :disabled="$v.formulario.$invalid"
@@ -35,6 +31,9 @@
             >Ingresar</v-btn>
           </v-layout>
         </v-card-text>
+        <v-card-actions>
+          <v-btn :to="{ name: 'registro' }" flat color="secondary">¿No tienes cuenta? Regístrate.</v-btn>
+        </v-card-actions>
       </v-card>
     </v-flex>
   </v-layout>
@@ -47,8 +46,8 @@ import {
   minLength,
   maxLength
 } from "vuelidate/lib/validators";
-import { setTimeout } from "timers";
-import { mapGetters, mapMutations } from "vuex";
+import { mapMutations, mapGetters } from "vuex";
+import { auth } from "@/firebase";
 
 
 export default {
@@ -74,42 +73,64 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['mostrarOcupado', 'ocultarOcupado', 'mostrarExito']),
-    ...mapMutations('sesion', ['actualizarUsuario']),
-    ingresar() {
+    ...mapMutations(["mostrarOcupado", "ocultarOcupado", "mostrarExito", "mostrarAdvertencia"]),
+    ...mapMutations("sesion", ["actualizarUsuario"]),
+    async ingresar() {
       if (this.$v.formulario.$invalid) {
         this.$v.formulario.$touch();
         return;
       }
 
-      let usuario = {
-        userName: "newton",
-        nombres: "Isaac",
-        apellidos: "Newton",
-        sexo: "M",
-        descripcion: "Descripción",
-        biografia: "https://es.wikipedia.org/wiki/Isaac_Newton",
-        fotoPerfil:
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Sir_Isaac_Newton_%281643-1727%29.jpg/220px-Sir_Isaac_Newton_%281643-1727%29.jpg"
-      };
-
       let ocupado = {
-        titulo: "Validando credenciales",
+        titulo: "Validando Credenciales",
         mensaje: "Estamos validando tu información..."
       };
 
       this.mostrarOcupado(ocupado);
 
-      setTimeout(() => {
-        this.ocultarOcupado()
+      try {
+        let cred = await auth.signInWithEmailAndPassword(
+          this.formulario.email,
+          this.formulario.password
+        );
+
+        let usuario = {
+          uid: cred.user.uid,
+          userName: "newton",
+          nombres: "Isaac",
+          apellidos: "Newton",
+          sexo: "M",
+          descripcion: "Descripción",
+          biografia: "https://es.wikipedia.org/wiki/Isaac_Newton",
+          fotoPerfil:
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Sir_Isaac_Newton_%281643-1727%29.jpg/220px-Sir_Isaac_Newton_%281643-1727%29.jpg"
+        };
+
+        this.ocultarOcupado();
         this.actualizarUsuario(usuario);
         this.mostrarExito(this.saludo);
-        this.$router.push({ name : 'home' })
-      }, 1000);
+        this.$router.push({ name: "home" });
+      } catch (error) {
+        this.ocultarOcupado();
+
+        switch (error.code) {
+          case "auth/user-not-found":
+            this.mostrarAdvertencia("El usuario que ha introducido no existe");
+            break;
+          case "auth/wrong-password":
+            this.mostrarAdvertencia("La contraseña que ha introducido no es correcta");
+            break;
+          default:
+            this.mostrarError(
+              "Ocurrió un error registrando tu cuenta. Inténtalo más tarde."
+            );
+            break;
+        }
+      }
     }
   },
   computed: {
-    ...mapGetters('sesion', ['saludo']),
+    ...mapGetters("sesion", ["saludo"]),
     erroresEmail() {
       let errores = [];
       if (!this.$v.formulario.email.$dirty) {
