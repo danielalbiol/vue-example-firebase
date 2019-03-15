@@ -24,6 +24,10 @@
         <v-card-text>
           <v-layout justify-end>
             <v-btn
+              :to="{ name: 'registro'}"
+              color="primary"
+            >Registrar</v-btn>
+            <v-btn
               @click="ingresar"
               :depressed="$v.formulario.$invalid"
               :disabled="$v.formulario.$invalid"
@@ -100,6 +104,7 @@ export default {
         this.ocultarOcupado()
         this.actualizarUsuario(usuario);
         this.mostrarExito(this.saludo);
+        this.$router.push({ name : 'home' })
       }, 1000);
     }
   },

@@ -2,7 +2,7 @@
   <v-app>
     <v-navigation-drawer v-model="menu" app temporary>
       <v-list>
-        <v-list-tile @click="seleccionar('home')">
+        <v-list-tile :to="{ name: 'home' }">
           <v-list-tile-action>
             <v-icon>home</v-icon>
           </v-list-tile-action>
@@ -10,7 +10,7 @@
             <v-list-tile-title v-text="'Inicio'"></v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-list-tile v-if="usuario" @click="seleccionar('perfil')">
+        <v-list-tile v-if="usuario" :to="{ name: 'perfil' }">
           <v-list-tile-action>
             <v-icon>account_circle</v-icon>
           </v-list-tile-action>
@@ -18,7 +18,7 @@
             <v-list-tile-title v-text="'Perfil'"></v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-list-tile v-if="!usuario" @click="seleccionar('login')">
+        <v-list-tile v-if="!usuario" :to="{ name: 'login' }">
           <v-list-tile-action>
             <v-icon>arrow_forward</v-icon>
           </v-list-tile-action>
@@ -42,13 +42,15 @@
         <span>{{ titulo }}</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <span v-if="usuario">{{ usuario.nombres }}</span>
+      <router-link class="nombre" :to="{ name: 'perfil' }">
+        <span v-if="usuario">{{ usuario.nombres }}</span>
+      </router-link>
     </v-toolbar>
 
     <v-content>
       <v-container fluid fill-height>
         <v-slide-y-transition mode="out-in">
-          <component :is="componenteActual"></component>
+          <router-view></router-view>
         </v-slide-y-transition>
       </v-container>
     </v-content>
@@ -79,23 +81,17 @@
 
     <v-footer color="primary" dark>
       <v-layout justify-center>
-        <span>Curso Vue.js y Firebase - Jorge Bustamante</span>
+        <span>Curso Vue.js y Firebase - Daniel Albiol</span>
       </v-layout>
     </v-footer>
   </v-app>
 </template>
 
 <script>
-import Home from "@/views/Home.vue";
-import Registro from "@/views/usuario/Registro.vue";
-import Login from "@/views/usuario/Login.vue";
-import Perfil from "@/views/usuario/Perfil.vue";
-
 import { mapState, mapMutations, mapActions } from "vuex";
 
 
 export default {
-  components: { Home, Registro, Login, Perfil },
   name: "App",
   data() {
     return {
@@ -118,6 +114,7 @@ export default {
     salir() {
       this.cerrarSesion()
       this.menu = false
+      this.$router.push({ name : 'login' })
     }
   }
 };
@@ -129,5 +126,11 @@ export default {
 .logo {
   font-family: "Great Vibes", cursive !important;
   cursor: pointer;
+}
+
+.nombre {
+  color: white;
+  text-decoration: none;
+  font-size: 1.2rem;
 }
 </style>

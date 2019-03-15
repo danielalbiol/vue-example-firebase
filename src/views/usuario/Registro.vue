@@ -32,6 +32,10 @@
           <v-card-text>
             <v-layout justify-end>
               <v-btn
+              :to="{ name: 'login'}"
+              color="primary"
+            >Ingresar</v-btn>
+              <v-btn
                 :depressed="$v.f1.$invalid"
                 :disabled="$v.f1.$invalid"
                 @click="siguiente(1)"
@@ -133,7 +137,7 @@ import { nombreCompuesto } from "@/utils/validaciones";
 export default {
   data() {
     return {
-      vista: 2,
+      vista: 1,
       f1: {
         email: "",
         password: "",

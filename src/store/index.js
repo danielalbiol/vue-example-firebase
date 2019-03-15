@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import sesion from './sesion'
-
+import teatro from './teatro'
 
 Vue.use(Vuex)
 
@@ -15,7 +15,7 @@ export default new Vuex.Store({
     ocupado: {
       visible: false,
       titulo: '',
-      mensaje: '',
+      mensaje: ''
     }
   },
   mutations: {
@@ -52,10 +52,13 @@ export default new Vuex.Store({
     }
   },
   actions: {
+
   },
   getters: {
+    
   },
   modules: {
-    sesion
+    sesion,
+    teatro
   }
 })
