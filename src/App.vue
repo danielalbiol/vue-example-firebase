@@ -2,7 +2,7 @@
   <v-app>
     <v-navigation-drawer v-model="menu" app temporary>
       <v-list>
-        <v-list-tile :to="{ name: 'home' }">
+        <v-list-tile :to="{ path: '/' }">
           <v-list-tile-action>
             <v-icon>home</v-icon>
           </v-list-tile-action>
@@ -38,12 +38,12 @@
     </v-navigation-drawer>
     <v-toolbar color="primary" dark app>
       <v-toolbar-side-icon @click="menu = !menu"></v-toolbar-side-icon>
-      <v-toolbar-title @click="componenteActual = 'home'" class="headline logo">
+      <v-toolbar-title @click="$router.push({ name: 'home' })" class="headline logo">
         <span>{{ titulo }}</span>
-      </v-toolbar-title>
-      <v-spacer></v-spacer>
+      </v-toolbar-title>   
+      <v-spacer></v-spacer>  
       <router-link class="nombre" :to="{ name: 'perfil' }">
-        <span v-if="usuario">{{ usuario.nombres }}</span>
+        <span v-if="usuario">{{ usuario.nombres }}</span> 
       </router-link>
     </v-toolbar>
 
@@ -55,24 +55,23 @@
       </v-container>
     </v-content>
 
-    <v-snackbar
-      v-model="notificacion.visible"
-      :color="notificacion.color"
-      multi-line
-      top
-      :timeout="6000"
-      dark
-    >
-      {{ notificacion.mensaje }}
-      <v-btn color="white" flat @click="ocultarNotificacion">Cerrar</v-btn>
+    <v-snackbar v-model="notificacion.visible" :color="notificacion.color" multi-line top :timeout="6000" dark>
+      {{notificacion.mensaje }}
+      <v-btn color="white" flat @click="ocultarNotificacion">
+        Cerrar
+      </v-btn>
     </v-snackbar>
 
     <v-dialog v-model="ocupado.visible" max-width="400" persistent>
       <v-card>
         <v-toolbar color="primary" dark card>
-          <v-toolbar-title>{{ ocupado.titulo }}</v-toolbar-title>
+          <v-toolbar-title>
+            {{ ocupado.titulo }}
+          </v-toolbar-title>
         </v-toolbar>
-        <v-card-text card="subheading">{{ ocupado.mensaje }}</v-card-text>
+        <v-card-text class="subheading">
+          {{ ocupado.mensaje }}
+        </v-card-text>
         <v-card-text>
           <v-progress-linear :indeterminate="true" color="primary"></v-progress-linear>
         </v-card-text>
@@ -81,50 +80,52 @@
 
     <v-footer color="primary" dark>
       <v-layout justify-center>
-        <span>Curso Vue.js y Firebase - Daniel Albiol</span>
+        <span>Curso Vue.js y Firebase - Jorge Bustamante</span>
       </v-layout>
     </v-footer>
   </v-app>
 </template>
 
 <script>
-import { mapState, mapMutations, mapActions } from "vuex";
 
+import Home from '@/views/Home.vue'
+import Registro from '@/views/usuario/Registro.vue'
+import Login from '@/views/usuario/Login.vue'
+import Perfil from '@/views/usuario/Perfil.vue'
+
+import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
-  name: "App",
-  data() {
+  components: { Home, Registro, Login, Perfil },
+  name: 'App',
+  data () {
     return {
-      titulo: "Súper Ópera",
-      componenteActual: "home",
+      titulo: 'Súper Ópera',
       menu: false
-    };
+    }
   },
   computed: {
     ...mapState(['notificacion', 'ocupado']),
-    ...mapState('sesion', ['usuario']),
+    ...mapState('sesion', ['usuario'])
   },
   methods: {
     ...mapMutations(['ocultarNotificacion']),
     ...mapActions('sesion', ['cerrarSesion']),
-    seleccionar(nombre) {
-      this.componenteActual = nombre;
-      this.menu = false;
-    },
     salir() {
       this.cerrarSesion()
       this.menu = false
-      this.$router.push({ name : 'login' })
+      this.$router.push({ name: 'login' })
     }
   }
-};
+}
 </script>
 
 <style>
-@import url("https://fonts.googleapis.com/css?family=Great+Vibes");
+
+@import url('https://fonts.googleapis.com/css?family=Great+Vibes');
 
 .logo {
-  font-family: "Great Vibes", cursive !important;
+  font-family: 'Great Vibes', cursive !important;
   cursor: pointer;
 }
 
@@ -133,4 +134,5 @@ export default {
   text-decoration: none;
   font-size: 1.2rem;
 }
+
 </style>

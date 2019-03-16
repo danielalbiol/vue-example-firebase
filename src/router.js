@@ -1,16 +1,23 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import { auth } from '@/firebase'
+
 import Home from './views/Home.vue'
+import NotFound from './views/NotFound.vue'
+
+import AccionesEmail from './views/usuario/AccionesEmail.vue'
+import EnvioVerificacionEmail from './views/usuario/EnvioVerificacionEmail.vue'
 import Login from './views/usuario/Login.vue'
 import Registro from './views/usuario/Registro.vue'
 import Perfil from './views/usuario/Perfil.vue'
+
 import Obra from './views/teatro/Obra.vue'
 import Presentacion from './views/teatro/Presentacion.vue'
-import NotFound from './views/NotFound.vue'
+
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [
@@ -20,22 +27,35 @@ export default new Router({
       component: Home
     },
     {
-      path: '/login',
+      path: '/sesion/login',
       name: 'login',
       component: Login
     },
     {
-      path: '/registro',
+      path: '/sesion/registro',
       name: 'registro',
       component: Registro
     },
     {
-      path: '/perfil',
-      name: 'perfil',
-      component: Perfil
+      path: '/sesion/envio-verificacion-email',
+      name: 'envio-verificacion-email',
+      component: EnvioVerificacionEmail
     },
     {
-      path: '/obra/:oid',
+      path: '/sesion/acciones-email',
+      name: 'acciones-email',
+      component: AccionesEmail
+    },
+    {
+      path: '/usuario/perfil',
+      name: 'perfil',
+      component: Perfil,
+      meta: {
+        autenticado: true
+      }
+    },
+    {
+      path: '/obras/:oid',
       name: 'obra',
       component: Obra
     },
@@ -50,8 +70,31 @@ export default new Router({
       component: NotFound
     },
     {
-      path: '*',
+      path:'*',
       component: NotFound
     }
   ]
 })
+
+router.beforeEach((to, from, next) => {
+  let user = auth.currentUser
+
+  if(to.matched.some(record => record.meta.autenticado)) {
+    if(user) {
+      if(user.providerData[0].providerId == 'password' && !user.emailVerified) {
+        next({ name: 'envio-verificacion-email' })
+      }
+      else {
+        next()
+      }
+    }
+    else {
+      next({ name: 'login' })
+    }
+  }
+  else {
+    next()
+  }
+})
+
+export default router
